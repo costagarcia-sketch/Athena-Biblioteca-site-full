@@ -1,22 +1,28 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Sistema de Biblioteca Escolar API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: books
+    description: Book management
+  - name: users
+    description: User management
+  - name: loans
+    description: Loan management
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +30,335 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /books:
+    get:
+      operationId: listBooks
+      tags: [books]
+      summary: List all books
+      responses:
+        "200":
+          description: List of books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Book"
+    post:
+      operationId: createBook
+      tags: [books]
+      summary: Create a book
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBookRequest"
+      responses:
+        "201":
+          description: Book created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+
+  /books/{id}:
+    get:
+      operationId: getBook
+      tags: [books]
+      summary: Get a book by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Book
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+    put:
+      operationId: updateBook
+      tags: [books]
+      summary: Update a book
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBookRequest"
+      responses:
+        "200":
+          description: Updated book
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+    delete:
+      operationId: deleteBook
+      tags: [books]
+      summary: Delete a book
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List all users (alunos)
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{id}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get a user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    put:
+      operationId: updateUser
+      tags: [users]
+      summary: Update a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRequest"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /loans:
+    get:
+      operationId: listLoans
+      tags: [loans]
+      summary: List all loans
+      responses:
+        "200":
+          description: List of loans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Loan"
+    post:
+      operationId: createLoan
+      tags: [loans]
+      summary: Create a loan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLoanRequest"
+      responses:
+        "201":
+          description: Loan created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Loan"
+
+  /loans/{id}:
+    get:
+      operationId: getLoan
+      tags: [loans]
+      summary: Get a loan by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Loan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Loan"
+    put:
+      operationId: updateLoan
+      tags: [loans]
+      summary: Update a loan (return, pay fine)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateLoanRequest"
+      responses:
+        "200":
+          description: Updated loan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Loan"
+
+  /loans/my:
+    get:
+      operationId: getMyLoans
+      tags: [loans]
+      summary: Get current user loans
+      responses:
+        "200":
+          description: My loans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Loan"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +369,219 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          enum: [adm, aluno]
+      required:
+        - email
+        - password
+        - role
+
+    LoginResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        token:
+          type: string
+      required:
+        - user
+        - token
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        matricula:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          nullable: true
+      required:
+        - id
+        - name
+        - email
+        - role
+
+    CreateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          default: aluno
+        matricula:
+          type: string
+          nullable: true
+      required:
+        - name
+        - email
+        - password
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        matricula:
+          type: string
+          nullable: true
+
+    Book:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        author:
+          type: string
+        isbn:
+          type: string
+          nullable: true
+        category:
+          type: string
+          nullable: true
+        quantity:
+          type: integer
+        available:
+          type: integer
+        createdAt:
+          type: string
+          nullable: true
+      required:
+        - id
+        - title
+        - author
+        - quantity
+        - available
+
+    CreateBookRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        author:
+          type: string
+        isbn:
+          type: string
+          nullable: true
+        category:
+          type: string
+          nullable: true
+        quantity:
+          type: integer
+        available:
+          type: integer
+      required:
+        - title
+        - author
+        - quantity
+        - available
+
+    Loan:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        bookId:
+          type: integer
+        loanDate:
+          type: string
+          nullable: true
+        dueDate:
+          type: string
+        returnDate:
+          type: string
+          nullable: true
+        status:
+          type: string
+        fine:
+          type: string
+          nullable: true
+        finePaid:
+          type: boolean
+          nullable: true
+        user:
+          $ref: "#/components/schemas/User"
+          nullable: true
+        book:
+          $ref: "#/components/schemas/Book"
+          nullable: true
+      required:
+        - id
+        - userId
+        - bookId
+        - dueDate
+        - status
+
+    CreateLoanRequest:
+      type: object
+      properties:
+        userId:
+          type: integer
+        bookId:
+          type: integer
+        dueDate:
+          type: string
+      required:
+        - userId
+        - bookId
+        - dueDate
+
+    UpdateLoanRequest:
+      type: object
+      properties:
+        status:
+          type: string
+        returnDate:
+          type: string
+          nullable: true
+        fine:
+          type: string
+          nullable: true
+        finePaid:
+          type: boolean
+          nullable: true

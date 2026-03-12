@@ -1,0 +1,19 @@
+packages:
+  "framer-motion": "For beautiful page transitions, modal animations, and micro-interactions"
+  "recharts": "For the admin dashboard analytics and loan charts"
+  "date-fns": "For elegant and human-readable date formatting in loan tables"
+  "clsx": "Utility for constructing className strings conditionally"
+  "tailwind-merge": "Utility to merge tailwind classes safely"
+  "lucide-react": "Comprehensive icon set for the UI"
+  "react-hook-form": "For robust form state management"
+  "@hookform/resolvers": "Zod resolver for form validation"
+
+images:
+  - path: "artifacts/biblioteca/public/images/hero-library.png"
+    description: "A gorgeous, modern academic library interior with natural lighting, tall wooden bookshelves, modern seating, and a sophisticated, inviting atmosphere. Clean architectural lines with soft sunlight filtering through large windows."
+    aspect_ratio: "16:9"
+
+notes:
+  - Auth token is stored in localStorage. Since customFetch is generated, we intercept window.fetch in api-setup.ts to inject the Authorization Bearer token automatically.
+  - Using wouter for routing.
+  - Relying on @workspace/api-client-react for TanStack Query hooks.
