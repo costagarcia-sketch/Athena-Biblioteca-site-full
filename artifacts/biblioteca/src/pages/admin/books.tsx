@@ -12,6 +12,9 @@ const bookSchema = z.object({
   author: z.string().min(1, "Obrigatório"),
   isbn: z.string().optional(),
   category: z.string().optional(),
+  description: z.string().optional(),
+  year: z.coerce.number().int().min(1000).max(2100).optional().or(z.literal("")),
+  publisher: z.string().optional(),
   quantity: z.coerce.number().min(1, "Mín. 1"),
 });
 type BookForm = z.infer<typeof bookSchema>;
@@ -32,7 +35,7 @@ export default function AdminBooks() {
 
   const openAdd = () => {
     setEditingBook(null);
-    reset({ title: "", author: "", isbn: "", category: "", quantity: 1 });
+    reset({ title: "", author: "", isbn: "", category: "", description: "", year: "", publisher: "", quantity: 1 });
     setModalOpen(true);
   };
 
@@ -42,6 +45,9 @@ export default function AdminBooks() {
     setValue("author", book.author);
     setValue("isbn", book.isbn || "");
     setValue("category", book.category || "");
+    setValue("description", (book as any).description || "");
+    setValue("year", (book as any).year || "");
+    setValue("publisher", (book as any).publisher || "");
     setValue("quantity", book.quantity);
     setModalOpen(true);
   };
@@ -53,11 +59,21 @@ export default function AdminBooks() {
   };
 
   const onSubmit = async (data: BookForm) => {
-    const payload = { ...data, available: data.quantity }; // Simplified: available starts as quantity
+    const payload = {
+      title: data.title,
+      author: data.author,
+      isbn: data.isbn || undefined,
+      category: data.category || undefined,
+      description: data.description || undefined,
+      year: data.year ? Number(data.year) : undefined,
+      publisher: data.publisher || undefined,
+      quantity: data.quantity,
+      available: editingBook ? editingBook.available : data.quantity,
+    };
     if (editingBook) {
       await updateMutation.mutateAsync({ id: editingBook.id, data: payload });
     } else {
-      await createMutation.mutateAsync({ data: payload });
+      await createMutation.mutateAsync({ data: { ...payload, available: data.quantity } });
     }
     setModalOpen(false);
   };
@@ -110,6 +126,7 @@ export default function AdminBooks() {
                       <div>
                         <p className="font-semibold text-foreground line-clamp-1">{book.title}</p>
                         <p className="text-xs text-muted-foreground">{book.author}</p>
+                        {(book as any).year && <p className="text-[10px] text-muted-foreground/60 mt-0.5">{(book as any).year}{(book as any).publisher ? ` · ${(book as any).publisher}` : ''}</p>}
                         {book.isbn && <p className="text-[10px] text-muted-foreground/60 mt-0.5">ISBN: {book.isbn}</p>}
                       </div>
                     </div>
@@ -151,32 +168,51 @@ export default function AdminBooks() {
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editingBook ? "Editar Livro" : "Novo Livro"}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-sm font-medium">Título</label>
-            <Input {...register("title")} />
+            <label className="text-sm font-medium">Título <span className="text-destructive">*</span></label>
+            <Input {...register("title")} placeholder="Ex: Dom Casmurro" />
           </div>
           <div className="space-y-1">
-            <label className="text-sm font-medium">Autor</label>
-            <Input {...register("author")} />
+            <label className="text-sm font-medium">Autor <span className="text-destructive">*</span></label>
+            <Input {...register("author")} placeholder="Ex: Machado de Assis" />
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium">Sinopse / Descrição</label>
+            <textarea
+              {...register("description")}
+              rows={3}
+              placeholder="Breve descrição do livro para os alunos..."
+              className="flex w-full rounded-xl border border-input bg-background/50 px-4 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-primary transition-all shadow-sm resize-none"
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-sm font-medium">Categoria</label>
-              <Input {...register("category")} />
+              <Input {...register("category")} placeholder="Ex: Literatura Brasileira" />
             </div>
             <div className="space-y-1">
               <label className="text-sm font-medium">ISBN</label>
-              <Input {...register("isbn")} />
+              <Input {...register("isbn")} placeholder="Ex: 978-85-..." />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Editora</label>
+              <Input {...register("publisher")} placeholder="Ex: Companhia das Letras" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Ano de Publicação</label>
+              <Input type="number" {...register("year")} placeholder="Ex: 1899" min={1000} max={2100} />
             </div>
           </div>
           <div className="space-y-1">
-            <label className="text-sm font-medium">Quantidade Total</label>
-            <Input type="number" {...register("quantity")} />
+            <label className="text-sm font-medium">Quantidade Total <span className="text-destructive">*</span></label>
+            <Input type="number" {...register("quantity")} min={1} />
           </div>
           
           <div className="flex justify-end gap-3 pt-4">
             <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>Cancelar</Button>
             <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-              Salvar
+              {createMutation.isPending || updateMutation.isPending ? "Salvando..." : "Salvar"}
             </Button>
           </div>
         </form>

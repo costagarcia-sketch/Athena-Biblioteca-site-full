@@ -482,6 +482,15 @@ components:
         category:
           type: string
           nullable: true
+        description:
+          type: string
+          nullable: true
+        year:
+          type: integer
+          nullable: true
+        publisher:
+          type: string
+          nullable: true
         quantity:
           type: integer
         available:
@@ -507,6 +516,15 @@ components:
           type: string
           nullable: true
         category:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        year:
+          type: integer
+          nullable: true
+        publisher:
           type: string
           nullable: true
         quantity:
