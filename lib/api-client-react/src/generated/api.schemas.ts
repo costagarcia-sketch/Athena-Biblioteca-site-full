@@ -66,6 +66,9 @@ export interface Book {
   author: string;
   isbn?: string | null;
   category?: string | null;
+  description?: string | null;
+  year?: number | null;
+  publisher?: string | null;
   quantity: number;
   available: number;
   createdAt?: string | null;
@@ -76,6 +79,9 @@ export interface CreateBookRequest {
   author: string;
   isbn?: string | null;
   category?: string | null;
+  description?: string | null;
+  year?: number | null;
+  publisher?: string | null;
   quantity: number;
   available: number;
 }

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useListBooks, useCreateLoan, getGetMyLoansQueryKey, getListBooksQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, Input, Badge, Button } from "@/components/ui/shared";
-import { Search, Library, BookOpen, X, User, Hash, Tag, Layers, CalendarDays, CheckCircle, AlertCircle } from "lucide-react";
+import { Search, Library, BookOpen, X, User, Hash, Tag, Layers, CalendarDays, CheckCircle, AlertCircle, Calendar, Building2, AlignLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Book = {
@@ -11,6 +11,9 @@ type Book = {
   author: string;
   isbn?: string | null;
   category?: string | null;
+  description?: string | null;
+  year?: number | null;
+  publisher?: string | null;
   quantity: number;
   available: number;
 };
@@ -94,17 +97,23 @@ export default function StudentCatalog() {
             <Card
               key={book.id}
               className="group hover:-translate-y-2 transition-all duration-300 flex flex-col h-full hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 cursor-pointer"
-              onClick={() => { setSelectedBook(book); setDueDate(""); setErrorMsg(""); }}
+              onClick={() => { setSelectedBook(book as Book); setDueDate(""); setErrorMsg(""); }}
             >
-              <div className="h-48 bg-gradient-to-br from-muted to-muted/50 p-6 flex flex-col items-center justify-center relative border-b border-border/50">
-                <BookOpen className="w-16 h-16 text-muted-foreground/30 group-hover:text-primary/40 transition-colors" />
+              <div className="h-48 bg-gradient-to-br from-primary/5 to-accent/5 p-6 flex flex-col items-center justify-center relative border-b border-border/50">
+                <BookOpen className="w-16 h-16 text-primary/20 group-hover:text-primary/40 transition-colors" />
+                {book.year && (
+                  <span className="absolute bottom-3 left-3 text-xs text-muted-foreground font-medium">{book.year}</span>
+                )}
                 <Badge variant="outline" className="absolute top-3 right-3 bg-card shadow-sm">
                   {book.category || 'Geral'}
                 </Badge>
               </div>
               <div className="p-5 flex-1 flex flex-col">
-                <h3 className="font-bold text-lg text-foreground line-clamp-2 group-hover:text-primary transition-colors">{book.title}</h3>
-                <p className="text-muted-foreground text-sm mt-1">{book.author}</p>
+                <h3 className="font-bold text-base text-foreground line-clamp-2 group-hover:text-primary transition-colors leading-snug">{book.title}</h3>
+                <p className="text-muted-foreground text-sm mt-1 line-clamp-1">{book.author}</p>
+                {book.description && (
+                  <p className="text-muted-foreground/70 text-xs mt-2 line-clamp-2 leading-relaxed">{book.description}</p>
+                )}
                 <div className="mt-auto pt-4 flex items-center justify-between">
                   <div className="text-sm font-medium">
                     {book.available > 0 ? (
@@ -143,7 +152,7 @@ export default function StudentCatalog() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.92, y: 24 }}
               transition={{ type: "spring", stiffness: 300, damping: 28 }}
-              className="relative bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
+              className="relative bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] overflow-y-auto"
             >
               {/* Header do modal */}
               <div className="bg-gradient-to-br from-primary/10 to-accent/5 border-b border-border p-6 flex gap-5 items-start">
@@ -152,9 +161,16 @@ export default function StudentCatalog() {
                 </div>
                 <div className="flex-1 min-w-0 pr-8">
                   <h2 className="text-xl font-display font-bold text-foreground leading-tight">{selectedBook.title}</h2>
-                  <p className="text-muted-foreground mt-1 flex items-center gap-1.5">
+                  <p className="text-muted-foreground mt-1 flex items-center gap-1.5 text-sm">
                     <User className="w-3.5 h-3.5" /> {selectedBook.author}
                   </p>
+                  {(selectedBook.year || selectedBook.publisher) && (
+                    <p className="text-muted-foreground/70 mt-1 text-xs flex items-center gap-1.5">
+                      {selectedBook.year && <><Calendar className="w-3 h-3" /> {selectedBook.year}</>}
+                      {selectedBook.year && selectedBook.publisher && <span className="mx-1">·</span>}
+                      {selectedBook.publisher && <><Building2 className="w-3 h-3" /> {selectedBook.publisher}</>}
+                    </p>
+                  )}
                 </div>
                 <button
                   onClick={() => setSelectedBook(null)}
@@ -165,6 +181,16 @@ export default function StudentCatalog() {
               </div>
 
               <div className="p-6 space-y-5">
+                {/* Descrição */}
+                {selectedBook.description && (
+                  <div className="bg-muted/30 rounded-xl p-4 border border-border/50">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5 mb-2">
+                      <AlignLeft className="w-3.5 h-3.5" /> Sinopse
+                    </p>
+                    <p className="text-sm text-foreground leading-relaxed">{selectedBook.description}</p>
+                  </div>
+                )}
+
                 {/* Informações do livro */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-muted/40 rounded-xl p-3 flex items-center gap-2">

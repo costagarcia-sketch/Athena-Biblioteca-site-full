@@ -32,7 +32,7 @@ router.get("/books/:id", requireAuth, async (req, res) => {
 
 router.post("/books", requireAuth, requireAdm, async (req, res) => {
   try {
-    const { title, author, isbn, category, quantity, available } = req.body;
+    const { title, author, isbn, category, description, year, publisher, quantity, available } = req.body;
     if (!title || !author) {
       res.status(400).json({ error: "Título e autor são obrigatórios" });
       return;
@@ -42,6 +42,9 @@ router.post("/books", requireAuth, requireAdm, async (req, res) => {
       author,
       isbn: isbn || null,
       category: category || null,
+      description: description || null,
+      year: year ? parseInt(year) : null,
+      publisher: publisher || null,
       quantity: quantity ?? 1,
       available: available ?? quantity ?? 1,
     }).returning();
@@ -55,9 +58,9 @@ router.post("/books", requireAuth, requireAdm, async (req, res) => {
 router.put("/books/:id", requireAuth, requireAdm, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const { title, author, isbn, category, quantity, available } = req.body;
+    const { title, author, isbn, category, description, year, publisher, quantity, available } = req.body;
     const [book] = await db.update(booksTable)
-      .set({ title, author, isbn, category, quantity, available })
+      .set({ title, author, isbn, category, description: description || null, year: year ? parseInt(year) : null, publisher: publisher || null, quantity, available })
       .where(eq(booksTable.id, id))
       .returning();
     if (!book) {
