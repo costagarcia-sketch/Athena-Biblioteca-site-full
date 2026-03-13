@@ -1,6 +1,6 @@
 import React from "react";
 import { useGetMyLoans } from "@workspace/api-client-react";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/lib/auth-context";
 import { Card, Button, Badge } from "@/components/ui/shared";
 import { BookOpen, CalendarClock, AlertCircle } from "lucide-react";
 import { format, parseISO, isAfter, differenceInDays } from "date-fns";

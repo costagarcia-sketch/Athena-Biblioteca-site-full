@@ -1,19 +1,11 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { useGetMe, User, LoginResponse } from "@workspace/api-client-react";
-
-interface AuthContextType {
-  user: User | null;
-  isLoading: boolean;
-  login: (data: LoginResponse) => void;
-  logout: () => void;
-  isAuthenticated: boolean;
-}
-
-const AuthContext = createContext<AuthContextType | null>(null);
+import React, { useEffect, useState } from "react";
+import { useGetMe } from "@workspace/api-client-react";
+import type { LoginResponse } from "@workspace/api-client-react";
+import { AuthContext } from "./auth-context";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(localStorage.getItem("biblioteca_token"));
-  
+
   const { data: user, isLoading, isError } = useGetMe({
     query: {
       enabled: !!token,
@@ -40,20 +32,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user: user || null, 
-      isLoading: isLoading && !!token, 
-      login, 
+    <AuthContext.Provider value={{
+      user: user || null,
+      isLoading: isLoading && !!token,
+      login,
       logout,
-      isAuthenticated: !!user 
+      isAuthenticated: !!user,
     }}>
       {children}
     </AuthContext.Provider>
   );
 }
-
-export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-  return ctx;
-};
