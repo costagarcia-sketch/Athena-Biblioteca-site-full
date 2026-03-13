@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { BookOpen, Users, LayoutDashboard, History, BookMarked, Sun, Moon, LogOut, Menu, X } from "lucide-react";
