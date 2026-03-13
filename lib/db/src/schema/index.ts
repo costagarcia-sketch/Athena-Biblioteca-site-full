@@ -31,9 +31,10 @@ export const loansTable = pgTable("loans", {
   userId: integer("user_id").notNull().references(() => usersTable.id),
   bookId: integer("book_id").notNull().references(() => booksTable.id),
   loanDate: timestamp("loan_date").defaultNow(),
+  pickupDate: timestamp("pickup_date"),
   dueDate: timestamp("due_date").notNull(),
   returnDate: timestamp("return_date"),
-  status: text("status").notNull().default("ativo"),
+  status: text("status").notNull().default("reservado"),
   fine: decimal("fine", { precision: 10, scale: 2 }).default("0"),
   finePaid: boolean("fine_paid").default(false),
 });

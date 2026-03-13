@@ -7,7 +7,8 @@
  */
 
 export interface CreateLoanRequest {
-  userId: number;
+  userId?: number | null;
   bookId: number;
+  pickupDate?: string | null;
   dueDate: string;
 }

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useListBooks, useCreateLoan, getGetMyLoansQueryKey, getListBooksQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, Input, Badge, Button } from "@/components/ui/shared";
-import { Search, Library, BookOpen, X, User, Hash, Tag, Layers, CalendarDays, CheckCircle, AlertCircle, Calendar, Building2, AlignLeft } from "lucide-react";
+import { Search, Library, BookOpen, X, User, Hash, Tag, Layers, CalendarDays, CheckCircle, AlertCircle, Calendar, Building2, AlignLeft, CalendarCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Book = {
@@ -32,6 +32,7 @@ export default function StudentCatalog() {
 
   const [search, setSearch] = useState("");
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [pickupDate, setPickupDate] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [successModal, setSuccessModal] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -42,9 +43,13 @@ export default function StudentCatalog() {
     (b.category && b.category.toLowerCase().includes(search.toLowerCase()))
   ) || [];
 
-  const minDate = new Date();
-  minDate.setDate(minDate.getDate() + 1);
-  const minDateStr = minDate.toISOString().split("T")[0];
+  const today = new Date();
+  const minPickup = new Date(today); minPickup.setDate(today.getDate() + 1);
+  const minPickupStr = minPickup.toISOString().split("T")[0];
+
+  const minDue = pickupDate
+    ? (() => { const d = new Date(pickupDate); d.setDate(d.getDate() + 1); return d.toISOString().split("T")[0]; })()
+    : minPickupStr;
 
   const handleRequestLoan = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,14 +59,16 @@ export default function StudentCatalog() {
       await createLoan.mutateAsync({
         data: {
           bookId: selectedBook.id,
+          pickupDate: pickupDate ? new Date(pickupDate).toISOString() : undefined,
           dueDate: new Date(dueDate).toISOString(),
         }
       });
       setSelectedBook(null);
+      setPickupDate("");
       setDueDate("");
       setSuccessModal(true);
     } catch (err: any) {
-      setErrorMsg(err?.message || "Erro ao solicitar empréstimo. Tente novamente.");
+      setErrorMsg(err?.message || "Erro ao solicitar agendamento. Tente novamente.");
     }
   };
 
@@ -71,7 +78,7 @@ export default function StudentCatalog() {
       <div className="text-center max-w-2xl mx-auto py-8">
         <Library className="w-12 h-12 text-primary mx-auto mb-4" />
         <h1 className="text-4xl font-display font-bold text-foreground">Catálogo da Biblioteca</h1>
-        <p className="text-muted-foreground mt-4 text-lg">Pesquise no acervo e solicite seu empréstimo diretamente.</p>
+        <p className="text-muted-foreground mt-4 text-lg">Agende a retirada de um livro diretamente pelo sistema.</p>
 
         <div className="mt-8 relative max-w-xl mx-auto shadow-lg shadow-primary/5 rounded-full">
           <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-muted-foreground w-6 h-6" />
@@ -97,7 +104,7 @@ export default function StudentCatalog() {
             <Card
               key={book.id}
               className="group hover:-translate-y-2 transition-all duration-300 flex flex-col h-full hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 cursor-pointer"
-              onClick={() => { setSelectedBook(book as Book); setDueDate(""); setErrorMsg(""); }}
+              onClick={() => { setSelectedBook(book as Book); setPickupDate(""); setDueDate(""); setErrorMsg(""); }}
             >
               <div className="h-48 bg-gradient-to-br from-primary/5 to-accent/5 p-6 flex flex-col items-center justify-center relative border-b border-border/50">
                 <BookOpen className="w-16 h-16 text-primary/20 group-hover:text-primary/40 transition-colors" />
@@ -122,7 +129,7 @@ export default function StudentCatalog() {
                       <span className="text-destructive">Indisponível</span>
                     )}
                   </div>
-                  <span className="text-xs text-primary font-semibold group-hover:underline">Ver detalhes →</span>
+                  <span className="text-xs text-primary font-semibold group-hover:underline">Agendar →</span>
                 </div>
               </div>
             </Card>
@@ -136,7 +143,7 @@ export default function StudentCatalog() {
         </div>
       )}
 
-      {/* Modal: Detalhes do Livro + Solicitar Empréstimo */}
+      {/* Modal: Detalhes do Livro + Agendar */}
       <AnimatePresence>
         {selectedBook && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -152,7 +159,7 @@ export default function StudentCatalog() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.92, y: 24 }}
               transition={{ type: "spring", stiffness: 300, damping: 28 }}
-              className="relative bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] overflow-y-auto"
+              className="relative bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden max-h-[92vh] overflow-y-auto"
             >
               {/* Header do modal */}
               <div className="bg-gradient-to-br from-primary/10 to-accent/5 border-b border-border p-6 flex gap-5 items-start">
@@ -220,24 +227,46 @@ export default function StudentCatalog() {
                   )}
                 </div>
 
-                {/* Formulário de empréstimo */}
+                {/* Formulário de agendamento */}
                 {selectedBook.available > 0 ? (
                   <form onSubmit={handleRequestLoan} className="space-y-4 border-t border-border pt-5">
                     <div>
                       <p className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-                        <CalendarDays className="w-4 h-4 text-primary" />
-                        Solicitar Empréstimo
+                        <CalendarCheck className="w-4 h-4 text-primary" />
+                        Agendar Retirada
                       </p>
-                      <div className="space-y-1">
-                        <label className="text-sm text-muted-foreground">Data de devolução prevista</label>
-                        <input
-                          type="date"
-                          required
-                          min={minDateStr}
-                          value={dueDate}
-                          onChange={e => setDueDate(e.target.value)}
-                          className="flex h-11 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
-                        />
+                      <p className="text-xs text-muted-foreground mb-4 bg-primary/5 border border-primary/10 rounded-xl p-3 leading-relaxed">
+                        Reserve o livro agora e retire pessoalmente na biblioteca na data escolhida. O livro ficará separado para você.
+                      </p>
+
+                      <div className="space-y-3">
+                        <div className="space-y-1">
+                          <label className="text-sm text-muted-foreground flex items-center gap-1.5">
+                            <CalendarDays className="w-3.5 h-3.5 text-primary" />
+                            Data prevista de retirada <span className="text-muted-foreground/50">(opcional)</span>
+                          </label>
+                          <input
+                            type="date"
+                            min={minPickupStr}
+                            value={pickupDate}
+                            onChange={e => { setPickupDate(e.target.value); setDueDate(""); }}
+                            className="flex h-11 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-sm text-muted-foreground flex items-center gap-1.5">
+                            <Calendar className="w-3.5 h-3.5 text-primary" />
+                            Data prevista de devolução <span className="text-destructive text-xs">*</span>
+                          </label>
+                          <input
+                            type="date"
+                            required
+                            min={minDue}
+                            value={dueDate}
+                            onChange={e => setDueDate(e.target.value)}
+                            className="flex h-11 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                          />
+                        </div>
                       </div>
                     </div>
 
@@ -252,7 +281,7 @@ export default function StudentCatalog() {
                         Fechar
                       </Button>
                       <Button type="submit" className="flex-1" disabled={createLoan.isPending}>
-                        {createLoan.isPending ? "Solicitando..." : "Solicitar Empréstimo"}
+                        {createLoan.isPending ? "Agendando..." : "Confirmar Agendamento"}
                       </Button>
                     </div>
                   </form>
@@ -273,7 +302,7 @@ export default function StudentCatalog() {
         )}
       </AnimatePresence>
 
-      {/* Modal: Empréstimo solicitado com sucesso */}
+      {/* Modal: Reserva confirmada */}
       <AnimatePresence>
         {successModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -295,16 +324,20 @@ export default function StudentCatalog() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.1, type: "spring", stiffness: 400, damping: 20 }}
-                className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center"
+                className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center"
               >
-                <CheckCircle className="w-10 h-10 text-green-600 dark:text-green-400" />
+                <CalendarCheck className="w-10 h-10 text-primary" />
               </motion.div>
 
-              <div className="space-y-1">
-                <h2 className="text-xl font-display font-bold text-foreground">Empréstimo Registrado!</h2>
-                <p className="text-muted-foreground text-sm">
-                  Seu empréstimo foi registrado com sucesso. Você pode acompanhar o prazo na aba <strong>Meus Empréstimos</strong>.
+              <div className="space-y-2">
+                <h2 className="text-xl font-display font-bold text-foreground">Reserva Agendada!</h2>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  Seu livro foi reservado com sucesso. Compareça à biblioteca para retirada. Acompanhe o status em <strong>Meus Empréstimos</strong>.
                 </p>
+              </div>
+
+              <div className="w-full bg-primary/5 border border-primary/10 rounded-xl p-3 text-xs text-muted-foreground leading-relaxed">
+                📍 O livro ficará separado para você. Lembre-se de retirar na data combinada!
               </div>
 
               <Button className="w-full" onClick={() => setSuccessModal(false)}>

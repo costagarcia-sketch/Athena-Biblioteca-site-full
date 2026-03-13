@@ -91,6 +91,7 @@ export interface Loan {
   userId: number;
   bookId: number;
   loanDate?: string | null;
+  pickupDate?: string | null;
   dueDate: string;
   returnDate?: string | null;
   status: string;
@@ -101,13 +102,15 @@ export interface Loan {
 }
 
 export interface CreateLoanRequest {
-  userId: number;
+  userId?: number | null;
   bookId: number;
+  pickupDate?: string | null;
   dueDate: string;
 }
 
 export interface UpdateLoanRequest {
   status?: string;
+  pickupDate?: string | null;
   returnDate?: string | null;
   fine?: string | null;
   finePaid?: boolean | null;

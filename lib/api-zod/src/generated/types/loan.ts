@@ -13,6 +13,7 @@ export interface Loan {
   userId: number;
   bookId: number;
   loanDate?: string | null;
+  pickupDate?: string | null;
   dueDate: string;
   returnDate?: string | null;
   status: string;
