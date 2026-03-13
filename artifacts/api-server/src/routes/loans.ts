@@ -83,9 +83,13 @@ router.get("/loans/:id", requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
-router.post("/loans", requireAuth, requireAdm, async (_req, res) => {
+router.post("/loans", requireAuth, async (req: AuthRequest, res) => {
   try {
-    const { userId, bookId, dueDate } = _req.body;
+    const isAdm = req.user!.role === "adm";
+    const { bookId, dueDate } = req.body;
+    // ADM can specify userId; aluno always uses their own id
+    const userId = isAdm ? req.body.userId : req.user!.id;
+
     if (!userId || !bookId || !dueDate) {
       res.status(400).json({ error: "UserId, bookId e dueDate são obrigatórios" });
       return;
