@@ -238,6 +238,7 @@ export const ListLoansResponseItem = zod.object({
   userId: zod.number(),
   bookId: zod.number(),
   loanDate: zod.string().nullish(),
+  pickupDate: zod.string().nullish(),
   dueDate: zod.string(),
   returnDate: zod.string().nullish(),
   status: zod.string(),
@@ -275,8 +276,9 @@ export const ListLoansResponse = zod.array(ListLoansResponseItem);
  * @summary Create a loan
  */
 export const CreateLoanBody = zod.object({
-  userId: zod.number(),
+  userId: zod.number().nullish(),
   bookId: zod.number(),
+  pickupDate: zod.string().nullish(),
   dueDate: zod.string(),
 });
 
@@ -292,6 +294,7 @@ export const GetLoanResponse = zod.object({
   userId: zod.number(),
   bookId: zod.number(),
   loanDate: zod.string().nullish(),
+  pickupDate: zod.string().nullish(),
   dueDate: zod.string(),
   returnDate: zod.string().nullish(),
   status: zod.string(),
@@ -333,6 +336,7 @@ export const UpdateLoanParams = zod.object({
 
 export const UpdateLoanBody = zod.object({
   status: zod.string().optional(),
+  pickupDate: zod.string().nullish(),
   returnDate: zod.string().nullish(),
   fine: zod.string().nullish(),
   finePaid: zod.boolean().nullish(),
@@ -343,6 +347,7 @@ export const UpdateLoanResponse = zod.object({
   userId: zod.number(),
   bookId: zod.number(),
   loanDate: zod.string().nullish(),
+  pickupDate: zod.string().nullish(),
   dueDate: zod.string(),
   returnDate: zod.string().nullish(),
   status: zod.string(),
@@ -383,6 +388,7 @@ export const GetMyLoansResponseItem = zod.object({
   userId: zod.number(),
   bookId: zod.number(),
   loanDate: zod.string().nullish(),
+  pickupDate: zod.string().nullish(),
   dueDate: zod.string(),
   returnDate: zod.string().nullish(),
   status: zod.string(),

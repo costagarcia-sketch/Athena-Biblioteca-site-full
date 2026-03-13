@@ -8,6 +8,7 @@
 
 export interface UpdateLoanRequest {
   status?: string;
+  pickupDate?: string | null;
   returnDate?: string | null;
   fine?: string | null;
   finePaid?: boolean | null;

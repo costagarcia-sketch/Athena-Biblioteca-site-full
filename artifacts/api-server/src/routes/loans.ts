@@ -86,12 +86,11 @@ router.get("/loans/:id", requireAuth, async (req: AuthRequest, res) => {
 router.post("/loans", requireAuth, async (req: AuthRequest, res) => {
   try {
     const isAdm = req.user!.role === "adm";
-    const { bookId, dueDate } = req.body;
-    // ADM can specify userId; aluno always uses their own id
+    const { bookId, dueDate, pickupDate } = req.body;
     const userId = isAdm ? req.body.userId : req.user!.id;
 
     if (!userId || !bookId || !dueDate) {
-      res.status(400).json({ error: "UserId, bookId e dueDate são obrigatórios" });
+      res.status(400).json({ error: "bookId e dueDate são obrigatórios" });
       return;
     }
 
@@ -101,31 +100,34 @@ router.post("/loans", requireAuth, async (req: AuthRequest, res) => {
       return;
     }
     if (book.available <= 0) {
-      res.status(400).json({ error: "Livro não disponível para empréstimo" });
+      res.status(400).json({ error: "Livro não disponível para reserva" });
       return;
     }
 
+    // Decrement available immediately when reserved (book is set aside)
     await db.update(booksTable).set({ available: book.available - 1 }).where(eq(booksTable.id, bookId));
 
     const [loan] = await db.insert(loansTable).values({
       userId,
       bookId,
+      pickupDate: pickupDate ? new Date(pickupDate) : null,
       dueDate: new Date(dueDate),
-      status: "ativo",
+      // ADM creates directly as "ativo"; students create as "reservado"
+      status: isAdm ? "ativo" : "reservado",
     }).returning();
 
     const loanWithDetails = await getLoanWithDetails(loan.id);
     res.status(201).json(loanWithDetails);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Erro ao criar empréstimo" });
+    res.status(500).json({ error: "Erro ao criar reserva" });
   }
 });
 
 router.put("/loans/:id", requireAuth, requireAdm, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const { status, returnDate, fine, finePaid } = req.body;
+    const { status, returnDate, pickupDate, fine, finePaid } = req.body;
 
     const [existing] = await db.select().from(loansTable).where(eq(loansTable.id, id));
     if (!existing) {
@@ -133,7 +135,16 @@ router.put("/loans/:id", requireAuth, requireAdm, async (req, res) => {
       return;
     }
 
+    // When returning a book: restore availability
     if (status === "devolvido" && existing.status !== "devolvido") {
+      const [book] = await db.select().from(booksTable).where(eq(booksTable.id, existing.bookId));
+      if (book) {
+        await db.update(booksTable).set({ available: book.available + 1 }).where(eq(booksTable.id, existing.bookId));
+      }
+    }
+
+    // When cancelling a reservation: restore availability
+    if (status === "cancelado" && existing.status === "reservado") {
       const [book] = await db.select().from(booksTable).where(eq(booksTable.id, existing.bookId));
       if (book) {
         await db.update(booksTable).set({ available: book.available + 1 }).where(eq(booksTable.id, existing.bookId));
@@ -142,6 +153,7 @@ router.put("/loans/:id", requireAuth, requireAdm, async (req, res) => {
 
     const updateData: Record<string, unknown> = {};
     if (status !== undefined) updateData.status = status;
+    if (pickupDate !== undefined) updateData.pickupDate = pickupDate ? new Date(pickupDate) : null;
     if (returnDate !== undefined) updateData.returnDate = returnDate ? new Date(returnDate) : null;
     if (fine !== undefined) updateData.fine = fine;
     if (finePaid !== undefined) updateData.finePaid = finePaid;

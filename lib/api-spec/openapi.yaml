@@ -549,6 +549,9 @@ components:
         loanDate:
           type: string
           nullable: true
+        pickupDate:
+          type: string
+          nullable: true
         dueDate:
           type: string
         returnDate:
@@ -580,12 +583,15 @@ components:
       properties:
         userId:
           type: integer
+          nullable: true
         bookId:
           type: integer
+        pickupDate:
+          type: string
+          nullable: true
         dueDate:
           type: string
       required:
-        - userId
         - bookId
         - dueDate
 
@@ -594,6 +600,9 @@ components:
       properties:
         status:
           type: string
+        pickupDate:
+          type: string
+          nullable: true
         returnDate:
           type: string
           nullable: true
