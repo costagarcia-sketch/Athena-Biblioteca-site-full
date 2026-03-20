@@ -66,7 +66,7 @@ router.get("/loans/my", requireAuth, async (req: AuthRequest, res) => {
 
 router.get("/loans/:id", requireAuth, async (req: AuthRequest, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const loan = await getLoanWithDetails(id);
     if (!loan) {
       res.status(404).json({ error: "Empréstimo não encontrado" });
@@ -126,7 +126,7 @@ router.post("/loans", requireAuth, async (req: AuthRequest, res) => {
 
 router.put("/loans/:id", requireAuth, requireAdm, async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const { status, returnDate, pickupDate, fine, finePaid } = req.body;
 
     const [existing] = await db.select().from(loansTable).where(eq(loansTable.id, id));

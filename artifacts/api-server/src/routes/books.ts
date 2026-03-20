@@ -17,7 +17,7 @@ router.get("/books", requireAuth, async (_req, res) => {
 
 router.get("/books/:id", requireAuth, async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const [book] = await db.select().from(booksTable).where(eq(booksTable.id, id));
     if (!book) {
       res.status(404).json({ error: "Livro não encontrado" });
@@ -57,7 +57,7 @@ router.post("/books", requireAuth, requireAdm, async (req, res) => {
 
 router.put("/books/:id", requireAuth, requireAdm, async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const { title, author, isbn, category, description, year, publisher, quantity, available } = req.body;
     const [book] = await db.update(booksTable)
       .set({ title, author, isbn, category, description: description || null, year: year ? parseInt(year) : null, publisher: publisher || null, quantity, available })
@@ -76,7 +76,7 @@ router.put("/books/:id", requireAuth, requireAdm, async (req, res) => {
 
 router.delete("/books/:id", requireAuth, requireAdm, async (req: AuthRequest, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     await db.delete(booksTable).where(eq(booksTable.id, id));
     res.json({ success: true, message: "Livro excluído" });
   } catch (err) {
