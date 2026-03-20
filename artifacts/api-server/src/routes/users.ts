@@ -24,7 +24,7 @@ router.get("/users", requireAuth, requireAdm, async (_req, res) => {
 
 router.get("/users/:id", requireAuth, requireAdm, async (req: AuthRequest, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const [user] = await db.select({
       id: usersTable.id,
       name: usersTable.name,
@@ -78,7 +78,7 @@ router.post("/users", requireAuth, requireAdm, async (_req, res) => {
 
 router.put("/users/:id", requireAuth, requireAdm, async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const { name, email, matricula } = req.body;
     const [user] = await db.update(usersTable)
       .set({ name, email, matricula })
@@ -104,7 +104,7 @@ router.put("/users/:id", requireAuth, requireAdm, async (req, res) => {
 
 router.delete("/users/:id", requireAuth, requireAdm, async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     await db.delete(usersTable).where(eq(usersTable.id, id));
     res.json({ success: true, message: "Usuário excluído" });
   } catch (err) {
