@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: biblioteca-escolar
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter @workspace/api-spec run codegen && PORT=5173 BASE_PATH=/ pnpm --filter @workspace/biblioteca run build && pnpm --filter @workspace/api-server run build
+    startCommand: node artifacts/api-server/dist/index.cjs
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: biblioteca-db
+          property: connectionString
+
+databases:
+  - name: biblioteca-db
+    region: oregon
+    plan: free
