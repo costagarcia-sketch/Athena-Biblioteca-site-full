@@ -2,4 +2,3 @@
 // the same names (e.g. LoginResponse) and cause TS2308 ambiguity errors.
 // Types can be derived from Zod schemas via z.infer<> when needed.
 export * from "./generated/api";
-export * from "./generated/types";
