@@ -57,9 +57,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 Input.displayName = "Input";
 
 // === CARD ===
-export function Card({ className, children }: { className?: string, children: React.ReactNode }) {
+export function Card({ className, children, onClick }: { className?: string, children: React.ReactNode, onClick?: React.MouseEventHandler<HTMLDivElement> }) {
   return (
-    <div className={cn("rounded-2xl border border-border/50 bg-card text-card-foreground shadow-lg shadow-black/5 overflow-hidden backdrop-blur-sm", className)}>
+    <div className={cn("rounded-2xl border border-border/50 bg-card text-card-foreground shadow-lg shadow-black/5 overflow-hidden backdrop-blur-sm", className)} onClick={onClick}>
       {children}
     </div>
   );
@@ -117,8 +117,8 @@ export function Table({ children }: { children: React.ReactNode }) {
 export function Th({ children, className }: { children: React.ReactNode, className?: string }) {
   return <th className={cn("h-12 px-4 text-left align-middle font-medium text-muted-foreground border-b", className)}>{children}</th>;
 }
-export function Td({ children, className }: { children: React.ReactNode, className?: string }) {
-  return <td className={cn("p-4 align-middle border-b border-border/50", className)}>{children}</td>;
+export function Td({ children, className, colSpan }: { children?: React.ReactNode, className?: string, colSpan?: number }) {
+  return <td colSpan={colSpan} className={cn("p-4 align-middle border-b border-border/50", className)}>{children}</td>;
 }
 export function Tr({ children, className }: { children: React.ReactNode, className?: string }) {
   return <tr className={cn("hover:bg-muted/50 transition-colors data-[state=selected]:bg-muted", className)}>{children}</tr>;
