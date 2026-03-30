@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import { db, usersTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import jwt from "jsonwebtoken";
+
+export const JWT_SECRET = process.env.JWT_SECRET || "biblioteca-secret-key-change-in-production";
 
 export interface AuthRequest extends Request {
   user?: {
@@ -22,28 +23,24 @@ export async function requireAuth(req: AuthRequest, res: Response, next: NextFun
   const token = authHeader.replace("Bearer ", "");
 
   try {
-    const userId = parseInt(token, 10);
-    if (isNaN(userId)) {
-      res.status(401).json({ error: "Token inválido" });
-      return;
-    }
-
-    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
-    if (!user) {
-      res.status(401).json({ error: "Usuário não encontrado" });
-      return;
-    }
+    const payload = jwt.verify(token, JWT_SECRET) as {
+      id: number;
+      name: string;
+      email: string;
+      role: string;
+      matricula: string | null;
+    };
 
     req.user = {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      matricula: user.matricula,
+      id: payload.id,
+      name: payload.name,
+      email: payload.email,
+      role: payload.role,
+      matricula: payload.matricula,
     };
     next();
   } catch {
-    res.status(401).json({ error: "Token inválido" });
+    res.status(401).json({ error: "Token inválido ou expirado" });
   }
 }
 
