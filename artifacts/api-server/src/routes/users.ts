@@ -1,7 +1,9 @@
 import { Router } from "express";
 import { db, usersTable } from "@workspace/db";
 import { eq, ne } from "drizzle-orm";
+import { hashSync } from "bcryptjs";
 import { requireAuth, requireAdm, type AuthRequest } from "../middlewares/auth";
+
 
 const router = Router();
 
@@ -54,7 +56,7 @@ router.post("/users", requireAuth, requireAdm, async (_req, res) => {
     const [user] = await db.insert(usersTable).values({
       name,
       email,
-      password,
+      password: hashSync(password, 10),
       role: role || "aluno",
       matricula: matricula || null,
     }).returning({
@@ -79,9 +81,13 @@ router.post("/users", requireAuth, requireAdm, async (_req, res) => {
 router.put("/users/:id", requireAuth, requireAdm, async (req, res) => {
   try {
     const id = parseInt(req.params.id as string);
-    const { name, email, matricula } = req.body;
+    const { name, email, matricula, password } = req.body;
+    const updateData: Record<string, any> = { name, email, matricula };
+    if (password) {
+      updateData.password = hashSync(password, 10);
+    }
     const [user] = await db.update(usersTable)
-      .set({ name, email, matricula })
+      .set(updateData)
       .where(eq(usersTable.id, id))
       .returning({
         id: usersTable.id,

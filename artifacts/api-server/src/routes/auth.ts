@@ -1,7 +1,9 @@
 import { Router } from "express";
 import { db, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
-import { requireAuth, type AuthRequest } from "../middlewares/auth";
+import { compareSync } from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { requireAuth, type AuthRequest, JWT_SECRET } from "../middlewares/auth";
 
 const router = Router();
 
@@ -21,7 +23,7 @@ router.post("/auth/login", async (req, res) => {
       return;
     }
 
-    if (user.password !== password) {
+    if (!compareSync(password, user.password)) {
       res.status(401).json({ error: "Email ou senha inválidos" });
       return;
     }
@@ -31,7 +33,17 @@ router.post("/auth/login", async (req, res) => {
       return;
     }
 
-    const token = String(user.id);
+    const token = jwt.sign(
+      {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        matricula: user.matricula,
+      },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
     res.json({
       user: {
