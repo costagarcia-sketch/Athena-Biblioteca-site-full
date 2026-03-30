@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db, loansTable, booksTable, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
-import { requireAuth, requireAdm, type AuthRequest } from "../middlewares/auth";
+import { requireAuth, requireAdm, requireStaff, type AuthRequest } from "../middlewares/auth";
 
 const router = Router();
 
@@ -23,7 +23,7 @@ async function getLoanWithDetails(id: number) {
   return { ...loan, user: user || null, book: book || null };
 }
 
-router.get("/loans", requireAuth, requireAdm, async (_req, res) => {
+router.get("/loans", requireAuth, requireStaff, async (_req, res) => {
   try {
     const loans = await db.select().from(loansTable).orderBy(loansTable.loanDate);
     const loansWithDetails = await Promise.all(
@@ -72,7 +72,7 @@ router.get("/loans/:id", requireAuth, async (req: AuthRequest, res) => {
       res.status(404).json({ error: "Empréstimo não encontrado" });
       return;
     }
-    if (req.user!.role !== "adm" && loan.userId !== req.user!.id) {
+    if (req.user!.role !== "adm" && req.user!.role !== "pedagogo" && loan.userId !== req.user!.id) {
       res.status(403).json({ error: "Acesso negado" });
       return;
     }
@@ -85,7 +85,7 @@ router.get("/loans/:id", requireAuth, async (req: AuthRequest, res) => {
 
 router.post("/loans", requireAuth, async (req: AuthRequest, res) => {
   try {
-    const isAdm = req.user!.role === "adm";
+    const isAdm = req.user!.role === "adm" || req.user!.role === "pedagogo";
     const { bookId, dueDate, pickupDate } = req.body;
     const userId = isAdm ? req.body.userId : req.user!.id;
 
@@ -124,7 +124,7 @@ router.post("/loans", requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
-router.put("/loans/:id", requireAuth, requireAdm, async (req, res) => {
+router.put("/loans/:id", requireAuth, requireStaff, async (req, res) => {
   try {
     const id = parseInt(req.params.id as string);
     const { status, returnDate, pickupDate, fine, finePaid } = req.body;

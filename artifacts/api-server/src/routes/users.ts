@@ -2,12 +2,12 @@ import { Router } from "express";
 import { db, usersTable } from "@workspace/db";
 import { eq, ne } from "drizzle-orm";
 import { hashSync } from "bcryptjs";
-import { requireAuth, requireAdm, type AuthRequest } from "../middlewares/auth";
+import { requireAuth, requireAdm, requireStaff, type AuthRequest } from "../middlewares/auth";
 
 
 const router = Router();
 
-router.get("/users", requireAuth, requireAdm, async (_req, res) => {
+router.get("/users", requireAuth, requireStaff, async (_req, res) => {
   try {
     const users = await db.select({
       id: usersTable.id,
