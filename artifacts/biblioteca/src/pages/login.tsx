@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "@/lib/theme";
 import { Card, Button, Input } from "@/components/ui/shared";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, UserCircle, Shield, Moon, Sun, ArrowLeft } from "lucide-react";
+import { BookOpen, UserCircle, Shield, Moon, Sun, ArrowLeft, GraduationCap } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,12 +16,26 @@ const loginSchema = z.object({
 });
 type LoginForm = z.infer<typeof loginSchema>;
 
+type Role = "adm" | "aluno" | "pedagogo";
+
+const roleLabels: Record<Role, string> = {
+  adm: "ADM",
+  aluno: "Aluno",
+  pedagogo: "Pedagogo",
+};
+
+const roleDestination: Record<Role, string> = {
+  adm: "/admin",
+  aluno: "/student",
+  pedagogo: "/pedagogo",
+};
+
 export default function Login() {
   const [, setLocation] = useLocation();
   const { login } = useAuth();
   const { theme, setTheme } = useTheme();
   
-  const [role, setRole] = useState<"adm" | "aluno" | null>(null);
+  const [role, setRole] = useState<Role | null>(null);
   
   const loginMutation = useLogin();
   
@@ -36,7 +50,7 @@ export default function Login() {
         data: { ...data, role }
       });
       login(result);
-      setLocation(role === "adm" ? "/admin" : "/student");
+      setLocation(roleDestination[role]);
     } catch (err) {
       console.error(err);
     }
@@ -99,7 +113,7 @@ export default function Login() {
                     <p className="text-muted-foreground text-lg">Selecione seu perfil para continuar</p>
                   </div>
                   
-                  <div className="grid gap-6">
+                  <div className="grid gap-4">
                     <button 
                       onClick={() => setRole("aluno")}
                       className="group flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-border bg-card hover:border-primary hover:bg-primary/5 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300"
@@ -109,6 +123,17 @@ export default function Login() {
                       </div>
                       <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">Sou Aluno</h3>
                       <p className="text-sm text-muted-foreground mt-2">Consultar acervo e meus empréstimos</p>
+                    </button>
+
+                    <button 
+                      onClick={() => setRole("pedagogo")}
+                      className="group flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-border bg-card hover:border-emerald-500 hover:bg-emerald-500/5 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300"
+                    >
+                      <div className="w-16 h-16 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <GraduationCap className="w-8 h-8" />
+                      </div>
+                      <h3 className="text-xl font-bold text-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Pedagogo</h3>
+                      <p className="text-sm text-muted-foreground mt-2">Gerenciar acervo e empréstimos</p>
                     </button>
 
                     <button 
@@ -137,7 +162,7 @@ export default function Login() {
                   
                   <div className="space-y-2 mb-8">
                     <h2 className="text-3xl font-display font-bold text-foreground">
-                      Acesso <span className="text-primary capitalize">{role}</span>
+                      Acesso <span className="text-primary capitalize">{roleLabels[role]}</span>
                     </h2>
                     <p className="text-muted-foreground text-lg">Insira suas credenciais para acessar o sistema.</p>
                   </div>
