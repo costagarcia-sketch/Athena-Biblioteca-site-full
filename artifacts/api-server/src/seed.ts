@@ -19,6 +19,24 @@ export async function seed() {
     console.log("[seed] Admin criado → email: admin@biblioteca.com  senha: Admin@123");
   }
 
+  const seedStudents = [
+    { name: "Joel Alves", email: "joel.alves@biblioteca.com", password: "aluno123", role: "aluno", matricula: "2026001" },
+  ];
+
+  for (const student of seedStudents) {
+    const [existing] = await db.select().from(usersTable).where(eq(usersTable.email, student.email));
+    if (!existing) {
+      await db.insert(usersTable).values({
+        name: student.name,
+        email: student.email,
+        password: hashSync(student.password, 10),
+        role: student.role,
+        matricula: student.matricula,
+      });
+      console.log(`[seed] Aluno criado → ${student.name} (${student.email})`);
+    }
+  }
+
   const books = await db.select().from(booksTable);
 
   if (books.length === 0) {
