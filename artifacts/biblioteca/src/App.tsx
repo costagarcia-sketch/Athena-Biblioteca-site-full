@@ -17,18 +17,22 @@ import AdminLoans from "@/pages/admin/loans";
 import StudentDashboard from "@/pages/student/dashboard";
 import StudentCatalog from "@/pages/student/catalog";
 import StudentLoans from "@/pages/student/loans";
+import PedagogoDashboard from "@/pages/pedagogo/dashboard";
 
 // Initialize global fetch interceptor
 setupApiInterceptor();
 const queryClient = new QueryClient();
 
-// Protected Route Component
-function ProtectedRoute({ component: Component, roleRequired, ...rest }: any) {
+// Protected Route Component — accepts single role or array of roles
+function ProtectedRoute({ component: Component, roleRequired, ...rest }: { component: React.ComponentType<any>, roleRequired?: string | string[] }) {
   const { user, isLoading, isAuthenticated } = useAuth();
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-background"><div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div></div>;
   if (!isAuthenticated) return <Redirect to="/login" />;
-  if (roleRequired && user?.role !== roleRequired) return <Redirect to="/" />;
+  if (roleRequired) {
+    const allowed = Array.isArray(roleRequired) ? roleRequired : [roleRequired];
+    if (!user || !allowed.includes(user.role)) return <Redirect to="/" />;
+  }
 
   return (
     <AppLayout>
@@ -42,7 +46,9 @@ function RootRedirect() {
   const { user, isLoading } = useAuth();
   if (isLoading) return null;
   if (!user) return <Redirect to="/login" />;
-  return <Redirect to={user.role === "adm" ? "/admin" : "/student"} />;
+  if (user.role === "adm") return <Redirect to="/admin" />;
+  if (user.role === "pedagogo") return <Redirect to="/pedagogo" />;
+  return <Redirect to="/student" />;
 }
 
 function Router() {
@@ -52,15 +58,20 @@ function Router() {
       <Route path="/login" component={Login} />
       
       {/* Admin Routes */}
-      <Route path="/admin">{(params) => <ProtectedRoute component={AdminDashboard} roleRequired="adm" />}</Route>
-      <Route path="/admin/books">{(params) => <ProtectedRoute component={AdminBooks} roleRequired="adm" />}</Route>
-      <Route path="/admin/users">{(params) => <ProtectedRoute component={AdminUsers} roleRequired="adm" />}</Route>
-      <Route path="/admin/loans">{(params) => <ProtectedRoute component={AdminLoans} roleRequired="adm" />}</Route>
+      <Route path="/admin">{() => <ProtectedRoute component={AdminDashboard} roleRequired="adm" />}</Route>
+      <Route path="/admin/books">{() => <ProtectedRoute component={AdminBooks} roleRequired="adm" />}</Route>
+      <Route path="/admin/users">{() => <ProtectedRoute component={AdminUsers} roleRequired="adm" />}</Route>
+      <Route path="/admin/loans">{() => <ProtectedRoute component={AdminLoans} roleRequired="adm" />}</Route>
+
+      {/* Pedagogo Routes */}
+      <Route path="/pedagogo">{() => <ProtectedRoute component={PedagogoDashboard} roleRequired="pedagogo" />}</Route>
+      <Route path="/pedagogo/loans">{() => <ProtectedRoute component={AdminLoans} roleRequired="pedagogo" />}</Route>
+      <Route path="/pedagogo/books">{() => <ProtectedRoute component={AdminBooks} roleRequired="pedagogo" />}</Route>
 
       {/* Student Routes */}
-      <Route path="/student">{(params) => <ProtectedRoute component={StudentDashboard} roleRequired="aluno" />}</Route>
-      <Route path="/student/catalog">{(params) => <ProtectedRoute component={StudentCatalog} roleRequired="aluno" />}</Route>
-      <Route path="/student/loans">{(params) => <ProtectedRoute component={StudentLoans} roleRequired="aluno" />}</Route>
+      <Route path="/student">{() => <ProtectedRoute component={StudentDashboard} roleRequired="aluno" />}</Route>
+      <Route path="/student/catalog">{() => <ProtectedRoute component={StudentCatalog} roleRequired="aluno" />}</Route>
+      <Route path="/student/loans">{() => <ProtectedRoute component={StudentLoans} roleRequired="aluno" />}</Route>
 
       <Route component={NotFound} />
     </Switch>

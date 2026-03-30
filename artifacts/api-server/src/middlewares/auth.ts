@@ -51,3 +51,11 @@ export function requireAdm(req: AuthRequest, res: Response, next: NextFunction) 
   }
   next();
 }
+
+export function requireStaff(req: AuthRequest, res: Response, next: NextFunction) {
+  if (!req.user || (req.user.role !== "adm" && req.user.role !== "pedagogo")) {
+    res.status(403).json({ error: "Acesso negado. Apenas ADM ou Pedagogo." });
+    return;
+  }
+  next();
+}

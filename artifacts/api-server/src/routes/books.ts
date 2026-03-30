@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db, booksTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
-import { requireAuth, requireAdm, type AuthRequest } from "../middlewares/auth";
+import { requireAuth, requireAdm, requireStaff, type AuthRequest } from "../middlewares/auth";
 
 const router = Router();
 
@@ -30,7 +30,7 @@ router.get("/books/:id", requireAuth, async (req, res) => {
   }
 });
 
-router.post("/books", requireAuth, requireAdm, async (req, res) => {
+router.post("/books", requireAuth, requireStaff, async (req, res) => {
   try {
     const { title, author, isbn, category, description, year, publisher, quantity, available } = req.body;
     if (!title || !author) {
@@ -55,7 +55,7 @@ router.post("/books", requireAuth, requireAdm, async (req, res) => {
   }
 });
 
-router.put("/books/:id", requireAuth, requireAdm, async (req, res) => {
+router.put("/books/:id", requireAuth, requireStaff, async (req, res) => {
   try {
     const id = parseInt(req.params.id as string);
     const { title, author, isbn, category, description, year, publisher, quantity, available } = req.body;
@@ -74,7 +74,7 @@ router.put("/books/:id", requireAuth, requireAdm, async (req, res) => {
   }
 });
 
-router.delete("/books/:id", requireAuth, requireAdm, async (req: AuthRequest, res) => {
+router.delete("/books/:id", requireAuth, requireStaff, async (req: AuthRequest, res) => {
   try {
     const id = parseInt(req.params.id as string);
     await db.delete(booksTable).where(eq(booksTable.id, id));

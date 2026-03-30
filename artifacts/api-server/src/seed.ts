@@ -21,6 +21,8 @@ export async function seed() {
 
   const seedStudents = [
     { name: "Joel Alves", email: "joel.alves@biblioteca.com", password: "aluno123", role: "aluno", matricula: "2026001" },
+    { name: "João Gabriel", email: "joao.gabriel@biblioteca.com", password: "pedagogo123", role: "pedagogo", matricula: null },
+    { name: "Nicolly", email: "nicolly@biblioteca.com", password: "pedagogo123", role: "pedagogo", matricula: null },
   ];
 
   for (const student of seedStudents) {
