@@ -8,10 +8,10 @@ import { requireAuth, type AuthRequest, JWT_SECRET } from "../middlewares/auth";
 const router = Router();
 
 router.post("/auth/login", async (req, res) => {
-  const { email, password, role } = req.body;
+  const { email, password } = req.body;
 
-  if (!email || !password || !role) {
-    res.status(400).json({ error: "Email, senha e perfil são obrigatórios" });
+  if (!email || !password) {
+    res.status(400).json({ error: "Email e senha são obrigatórios" });
     return;
   }
 
@@ -25,11 +25,6 @@ router.post("/auth/login", async (req, res) => {
 
     if (!compareSync(password, user.password)) {
       res.status(401).json({ error: "Email ou senha inválidos" });
-      return;
-    }
-
-    if (user.role !== role) {
-      res.status(401).json({ error: `Este usuário não tem perfil de ${role === "adm" ? "ADM" : "Aluno"}` });
       return;
     }
 
