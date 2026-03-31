@@ -1,0 +1,39 @@
+==> Downloading cache...
+==> Cloning from https://github.com/costagarcia-sketch/Athena-Biblioteca-site-full
+==> Checking out commit d612c4da92ba92b68aa53579da9379b0cf1f831f in branch replit-agent
+==> Downloaded 136MB in 2s. Extraction took 7s.
+==> Using Node.js version 22.22.0 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Running build command 'pnpm install --frozen-lockfile && pnpm --filter @workspace/api-spec run codegen && PORT=5173 BASE_PATH=/ pnpm --filter @workspace/biblioteca run build && pnpm --filter @workspace/api-server run build'...
+> @workspace/api-spec@0.0.0 codegen /opt/render/project/src/lib/api-spec
+> orval --config ./orval.config.ts
+🍻 orval v8.5.3 - A swagger client generator for typescript
+api-client-react Cleaning output folder
+🎉 api-client-react - Your OpenAPI spec has been converted into ready to use orval!
+zod Cleaning output folder
+🎉 zod - Your OpenAPI spec has been converted into ready to use orval!
+> @workspace/biblioteca@0.0.0 build /opt/render/project/src/artifacts/biblioteca
+> vite build --config vite.config.ts
+vite v7.3.1 building client environment for production...
+transforming...
+src/components/ui/tooltip.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+✓ 3638 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/public/index.html                     0.68 kB │ gzip:   0.39 kB
+dist/public/assets/index-BkBhDxCE.css    108.99 kB │ gzip:  17.16 kB
+dist/public/assets/index-BfnNRJMk.js   1,017.95 kB │ gzip: 298.55 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.07s
+> @workspace/api-server@0.0.0 build /opt/render/project/src/artifacts/api-server
+> tsx ./build.ts
+building server...
+  dist/index.cjs  1.3mb ⚠️
+⚡ Done in 313ms
+==> Uploading build...
+==> Uploaded in 5.8s. Compression took 6.5s
+==> Build successful 🎉
+==> Deploying...
