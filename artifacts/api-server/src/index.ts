@@ -1,5 +1,6 @@
 import app from "./app";
 import { seed } from "./seed";
+import { runMigrations } from "@workspace/db";
 
 const rawPort = process.env["PORT"];
 
@@ -15,13 +16,14 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-seed()
+runMigrations()
+  .then(() => seed())
   .then(() => {
     app.listen(port, () => {
       console.log(`Server listening on port ${port}`);
     });
   })
   .catch((err) => {
-    console.error("[seed] Falha ao inicializar banco de dados:", err);
+    console.error("[startup] Falha ao inicializar:", err);
     process.exit(1);
   });
